@@ -25,24 +25,22 @@ class SofficeHandler():
         self.desktop = None
         self.files = []
         self.main_frame = None
+        self.presentation = None
 
     """Clean up after killing the object."""
     def __del__(self):
         try:
-            if self.sub:
-                self.sub.wait()
+            self.kill_soffice()
         except Exception as e:
-            #print(e)
-            pass
+            print(e)
 
     """Start a new soffice process and listen on port 2002."""
     def start_soffice(self):
         try:
-            self.sub = subprocess.Popen(args=["/usr/bin/soffice", "--impress", "--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager", "--norestore", "--nolockcheck"])
+            self.sub = subprocess.Popen(args=["/usr/bin/sofficeasdfasd", "--impress", "--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager", "--norestore", "--nolockcheck"])
             return self.sub.pid
         except Exception as e:
-            #print(e)
-            return False
+            print(e)
 
     """Terminate the soffice process."""
     def kill_soffice(self):
@@ -50,20 +48,16 @@ class SofficeHandler():
             self.sub.terminate()
             while not self.sub.wait(timeout=10):
                 pass
-            return True
         except TimeoutExpired:
             try:
                 self.sub.kill()
-                return True
             except Exception as kill_exc:
-                #print(kill_exc)
-                return True
+                print(kill_exc)
         except Exception as e:
-            #print(e)
-            return False
+            print(e)
 
-    """Connect to the soffice process started with start_soffice."""
-    def connect_to_soffice(self):
+    """Connect to the soffice process listening on port 2002."""
+    def connect(self):
         try:
             tries=0
             while tries<10:
@@ -78,35 +72,28 @@ class SofficeHandler():
             self.smgr = self.remote_context.ServiceManager
             # get the central desktop object
             self.desktop = self.smgr.createInstanceWithContext( "com.sun.star.frame.Desktop", self.remote_context)
-            return True
         except Exception as e:
             print(e)
-            return False
 
     """Load the file from the first position in the files list."""
     def load_main_file(self):
         try:
             url = pathlib.Path(os.getcwd(), self.files[0]).as_uri() # get file in current directory, this could be better like an absolute path or a link on the website.
             self.main_frame = self.desktop.loadComponentFromURL(url, "_default", 0, ())
-            return True
+            self.presentation = self.main_frame.getPresentation()
         except Exception as e:
             print(e)
-            return False
 
     """Start the main slideshow."""
     def show_main_slideshow(self):
         try:
-            self.main_frame.Presentation.start()
-            return True
+            self.presentation.start()
         except Exception as e:
             print(e)
-            return False
 
     """End the main slideshow."""
-    def stop_main_slideshow(self):
+    def end_main_slideshow(self):
         try:
-            self.main_frame.Presentation.end()
-            return True
+            self.presentation.end()
         except Exception as e:
             print(e)
-            return False

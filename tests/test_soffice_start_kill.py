@@ -3,7 +3,7 @@ from soffice_handler import SofficeHandler
 
 soffice = SofficeHandler()
 def test_start_soffice():
-    assert soffice.start_soffice() != False
+    soffice.start_soffice()
 
 def test_kill_soffice():
-    assert soffice.kill_soffice() == True
+    soffice.kill_soffice()
