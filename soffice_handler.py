@@ -37,7 +37,7 @@ class SofficeHandler():
     """Start a new soffice process and listen on port 2002."""
     def start_soffice(self):
         try:
-            self.sub = subprocess.Popen(args=["/usr/bin/sofficeasdfasd", "--impress", "--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager", "--norestore", "--nolockcheck"])
+            self.sub = subprocess.Popen(args=["/usr/bin/soffice", "--impress", "--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager", "--norestore", "--nolockcheck"])
             return self.sub.pid
         except Exception as e:
             print(e)
