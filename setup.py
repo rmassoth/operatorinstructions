@@ -6,7 +6,4 @@ setup(name='operatorinstructions',
       author='Ryan Massoth',
       author_email='rmassoth@baeind.com',
       packages=[],
-      install_requires=[
-        'psycopg2>=2.7',
-      ]
-     )
+      install_requires=['psycopg2>=2.7',])
