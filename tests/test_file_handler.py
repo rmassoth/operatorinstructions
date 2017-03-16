@@ -24,7 +24,9 @@ def test_local_file_check_missing_file():
     assert not file_handler.check_for_local_file('Nothing')
 
 def test_network_file_getter():
-    url = "http://ah-plantfloor.marisabae.com/ahdocs/AUBURN HILLS PRODUCTION DOCUMENTS/484 - LINE/283362/01 Operator Instructions/(I-11100) 283362 Final Inspection.ppt"
+    url = ("http://ah-plantfloor.marisabae.com/ahdocs/"
+          "AUBURN HILLS PRODUCTION DOCUMENTS/484 - LINE/283362/"
+          "01 Operator Instructions/(I-11100) 283362 Final Inspection.ppt")
     file_handler.get_file_from_network(url, "temp.ppt")
 
 def test_network_file_missing():

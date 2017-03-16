@@ -15,37 +15,36 @@ sys.path.append('/usr/lib/libreoffice/program')
 if getattr(os.environ, 'URE_BOOTSTRAP', None) is None:
     os.environ['URE_BOOTSTRAP'] = ("vnd.sun.star.pathname:/usr/lib/"
                                    "libreoffice/program/fundamentalrc")
-import pyuno
 import uno
-from com.sun.star.beans import PropertyValue, UnknownPropertyException
-from com.sun.star.uno import (RuntimeException)
 from com.sun.star.connection import NoConnectException
 
 class SofficeHandler():
     """Class to handle all libreoffice(soffice) related functions."""
-
-    def __init__(self):
-        # pointer to the soffice subprocess
-        self.sub = None
-        # get the uno component context from the PyUNO runtime
-        self.local_context = uno.getComponentContext()
-        # create the UnoUrlResolver
-        self.resolver = (
-            self.local_context.ServiceManager.createInstanceWithContext(
-                "com.sun.star.bridge.UnoUrlResolver", self.local_context))
-        self.remote_context = None
-        self.smgr = None
-        self.desktop = None
-        self.files = []
-        self.main_frame = None
-        self.presentation = None
+    # pointer to the soffice subprocess
+    sub = None
+    remote_context = None
+    smgr = None
+    desktop = None
+    files = []
+    main_frame = None
+    presentation = None
+    local_context = None
+    resolver = None
 
     def __del__(self):
         """Clean up after killing the object."""
-        #self.kill_soffice()
+        try:
+            if self.sub:
+                output, errs = self.sub.communicate(timeout=1)
+        except TimeoutExpired:
+            self.kill_soffice()
 
     def start_soffice(self):
         """Start a new soffice process and listen on port 2002."""
+        if self.sub:
+            return_code = self.sub.poll()
+            if return_code:
+                self.sub.wait()
         self.sub = subprocess.Popen(
             args=[
                 "/usr/bin/soffice",
@@ -59,6 +58,13 @@ class SofficeHandler():
     def kill_soffice(self):
         """Terminate the soffice process."""
         try:
+            #self.close_soffice()
+            self.desktop = None
+            self.smgr = None
+            self.remote_context = None
+            self.resolver = None
+            self.local_context = None
+            # kill the soffice process itself
             self.sub.terminate()
             while not self.sub.wait(timeout=10):
                 pass
@@ -67,9 +73,19 @@ class SofficeHandler():
 
     def connect(self):
         """Connect to the soffice process listening on port 2002."""
+        if self.sub:
+            return_code = self.sub.poll()
+            if return_code:
+                self.sub.wait()
         tries = 0
         while tries < 10:
             try:
+                 # get the uno component context from the PyUNO runtime
+                self.local_context = uno.getComponentContext()
+                # create the UnoUrlResolver
+                self.resolver = (
+                    self.local_context.ServiceManager.createInstanceWithContext
+                    ("com.sun.star.bridge.UnoUrlResolver", self.local_context))
                 # connect to the running office
                 self.remote_context = self.resolver.resolve(
                     "uno:socket,host=localhost,port=2002;"
@@ -102,3 +118,20 @@ class SofficeHandler():
     def end_main_slideshow(self):
         """End the main slideshow."""
         self.presentation.end()
+
+    def close_soffice(self):
+        """Close the frame and desktop but don't kill the process."""
+        # close impress frame
+        if self.main_frame:
+            self.main_frame.close(True)
+        # close desktop frame
+        if self.desktop:
+            self.desktop.terminate()
+
+    def load_file(index):
+        """Load the file from the index position in the files list."""
+        # get file in current directory
+        url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()
+        self.main_frame = self.desktop.loadComponentFromURL(
+            url, "_default", 0, ())
+        self.presentation = self.main_frame.getPresentation()

@@ -32,8 +32,12 @@ class DatabaseHandler():
             query = ("select running_recipe_id from "
                      "productiondata_livedata where machine_id=%s;")
             cursor.execute(query, (machine_id,))
+            recipe = cursor.fetchall()
             db_connection.close()
-            return cursor.fetchall()[0][0]
+            if bool(recipe):
+                return recipe[0][0]
+            else:
+                return None
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
@@ -47,12 +51,14 @@ class DatabaseHandler():
                 database=self.database)
             cursor = db_connection.cursor()
             cursor.execute(
-                "select docid from rpimanager_rpiconfig where rpi_id=%s "
-                "and partnumber_id;"
-                , (unit_id, recipe,))
-            docid = cursor.fetchall()[0][0]
+                "select doc_url from rpimanager_rpiconfig where rpi_id=%s "
+                "and partnumber_id=%s;", (unit_id, recipe,))
+            filenames_list = cursor.fetchall()
             db_connection.close()
-            return docid
+            if bool(filenames_list):
+                return filenames_list[0][0]
+            else:
+                return None
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
@@ -68,9 +74,12 @@ class DatabaseHandler():
             cursor.execute(
                 "select * from rpimanager_rpiunit where hostname=%s;",
                 (hostname,))
-            config = cursor.fetchall()[0]
+            config = cursor.fetchall()
             db_connection.close()
-            return config
+            if bool(config):
+                return config[0]
+            else:
+                return None
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
@@ -84,10 +93,14 @@ class DatabaseHandler():
                 database=self.database)
             cursor = db_connection.cursor()
             cursor.execute(
-                "select * from rpimanager_rpiversion order by id desc limit 1;")
-            config = cursor.fetchall()[0][0]
+                "select * from rpimanager_rpiversion order by id desc "
+                "limit 1;")
+            config = cursor.fetchall()
             db_connection.close()
-            return config
+            if bool(config):
+                return config[0]
+            else:
+                return None
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
