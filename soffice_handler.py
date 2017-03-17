@@ -95,7 +95,7 @@ class SofficeHandler():
                 pass
             tries += 1
             # pause if no connection was made
-            sleep(1)
+            sleep(3)
         if tries >= 10:
             raise NoConnectException
         self.smgr = self.remote_context.ServiceManager
@@ -107,6 +107,14 @@ class SofficeHandler():
         """Load the file from the first position in the files list."""
         # get file in current directory
         url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()
+        self.main_frame = self.desktop.loadComponentFromURL(
+            url, "_default", 0, ())
+        self.presentation = self.main_frame.getPresentation()
+
+    def load_main_file_from_network(self):
+        """Load the file from the first position in the files list."""
+        # get file in current directory
+        url = self.files[0]
         self.main_frame = self.desktop.loadComponentFromURL(
             url, "_default", 0, ())
         self.presentation = self.main_frame.getPresentation()

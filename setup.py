@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='operatorinstructions',
-      version='0.3.1',
+      version='0.4.0',
       description='BAE Operator Instruction Management',
       author='Ryan Massoth',
       author_email='rmassoth@baeind.com',
