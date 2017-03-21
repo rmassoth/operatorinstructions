@@ -17,6 +17,7 @@ if getattr(os.environ, 'URE_BOOTSTRAP', None) is None:
                                    "libreoffice/program/fundamentalrc")
 import uno
 from com.sun.star.connection import NoConnectException
+from com.sun.star.lang import IllegalArgumentException
 
 class SofficeHandler():
     """Class to handle all libreoffice(soffice) related functions."""
@@ -107,17 +108,24 @@ class SofficeHandler():
         """Load the file from the first position in the files list."""
         # get file in current directory
         url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()
-        self.main_frame = self.desktop.loadComponentFromURL(
-            url, "_default", 0, ())
-        self.presentation = self.main_frame.getPresentation()
+        try:
+            self.main_frame = self.desktop.loadComponentFromURL(
+                url, "_default", 0, ())
+            self.presentation = self.main_frame.getPresentation()
+        except IllegalArgumentException:
+            raise
 
     def load_main_file_from_network(self):
         """Load the file from the first position in the files list."""
         # get file in current directory
         url = self.files[0]
-        self.main_frame = self.desktop.loadComponentFromURL(
-            url, "_default", 0, ())
-        self.presentation = self.main_frame.getPresentation()
+        try:
+            self.main_frame = self.desktop.loadComponentFromURL(
+                url, "_default", 0, ())
+            self.presentation = self.main_frame.getPresentation()
+            return True
+        except IllegalArgumentException:
+            return False
 
     def show_main_slideshow(self):
         """Start the main slideshow."""
@@ -137,6 +145,14 @@ class SofficeHandler():
             self.desktop.terminate()
 
     def load_file(index):
+        """Load the file from the index position in the files list."""
+        # get file in current directory
+        url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()
+        self.main_frame = self.desktop.loadComponentFromURL(
+            url, "_default", 0, ())
+        self.presentation = self.main_frame.getPresentation()
+
+    def load_network_file(index):
         """Load the file from the index position in the files list."""
         # get file in current directory
         url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()

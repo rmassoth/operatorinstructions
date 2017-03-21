@@ -43,7 +43,7 @@ class FileHandler():
     def receive_file_from_socket(self):
         """
 
-        Receives a file over a socket conenction and saves it to the local
+        Receives a file over a socket connection and saves it to the local
         directory.
         """
         pass

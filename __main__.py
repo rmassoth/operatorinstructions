@@ -5,13 +5,24 @@ It handles creating objects and swtiching between different presentations.
 """
 import socket
 from time import sleep
+import logging
+import logging.handlers
+from urllib.request import Request
 from soffice_handler import SofficeHandler
 from file_handler import FileHandler
 from database_handler import DatabaseHandler
 
 soffice = SofficeHandler()
 file_handler = FileHandler()
-database_handler = DatabaseHandler(database='plantfloor')
+database_handler = DatabaseHandler(database="plantfloor")
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+log_handler = logging.handlers.RotatingFileHandler("operatorinstructions.log",
+                                                   maxBytes=500000,
+                                                   backupCount=2)
+log_format = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+log_handler.setFormatter(log_format)
+logger.addHandler(log_handler)
 
 class RPI():
     """
@@ -20,7 +31,7 @@ class RPI():
     """
 
     def __init__(self, unit_id=0, hostname="Unknown", ipaddress="",
-                 description="", active=False, linenumber_id=''):
+                 description="", active=False, linenumber_id=""):
 
         self.unit_id = unit_id
         self.hostname = hostname
@@ -28,6 +39,14 @@ class RPI():
         self.description = description
         self.active = active
         self.linenumber_id = linenumber_id
+
+def copy_new_version():
+    """
+
+    Gets the new version of this program and replaces itself and
+    restarts.
+    """
+    pass
 
 def main():
     """
@@ -41,12 +60,12 @@ def main():
         rpi_config = database_handler.get_rpi_config(
             hostname=socket.gethostname())
         if rpi_config:
-            rpi = RPI(rpi_config[0],
-                      rpi_config[1],
-                      rpi_config[2],
-                      rpi_config[3],
-                      rpi_config[4],
-                      rpi_config[5])
+            rpi = RPI(unit_id=rpi_config[0],
+                      hostname=rpi_config[1],
+                      ipaddress=rpi_config[2],
+                      description=rpi_config[3],
+                      active=rpi_config[4],
+                      linenumber_id=rpi_config[5])
 
             recipe = database_handler.get_current_running_recipe(
                 rpi.linenumber_id)
@@ -54,17 +73,47 @@ def main():
                                                                 recipe)
             if file:
                 soffice.files.append(file)
+            else:
+                soffice.files.append("http://ah-plantfloor.marisabae.com/media"
+                    "/operatorinstructions/Unconfigured.pptx")
+            if soffice.load_main_file_from_network():
+                soffice.show_main_slideshow()
+            else:
+                soffice.files[0] = ("http://ah-plantfloor.marisabae.com/media"
+                    "/operatorinstructions/Unconfigured.pptx")
+                if soffice.load_main_file_from_network():
+                    soffice.show_main_slideshow()
+            logger.debug("Setup complete, entering main loop...")
+        while(True):
+            # Main loop
+            recipe = database_handler.get_current_running_recipe(
+                rpi.linenumber_id)
+            file = database_handler.get_current_recipe_filename(rpi.unit_id,
+                                                                recipe)
+            # Change main slideshow if recipe changed
+            if file and file != soffice.files[0]:
+                soffice.files[0] = file
+                soffice.end_main_slideshow()
                 soffice.load_main_file_from_network()
                 soffice.show_main_slideshow()
-                sleep(10)
-                soffice.end_main_slideshow()
             else:
-                print("No file")
-        while(True):
-            sleep(10)
+                soffice.files.append("http://ah-plantfloor.marisabae.com/media"
+                    "/operatorinstructions/Unconfigured.pptx")
+
+            # Restart soffice if it died for some reason
+            if soffice.sub.poll() is not None:
+                logger.debug("Soffice died. Poll: {}".format(
+                    soffice.sub.poll()))
+                #soffice.kill_soffice() # gets stuck for some reason
+                soffice.start_soffice()
+                soffice.connect()
+                soffice.load_main_file_from_network()
+                soffice.show_main_slideshow()
+            sleep(30)
         soffice.kill_soffice()
     except Exception as error:
-        print(error)
+        logger.error(error)
+        raise
 
 if __name__ == "__main__":
     main()
