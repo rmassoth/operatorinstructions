@@ -1,8 +1,12 @@
-import pytest
-from soffice_handler import SofficeHandler
 from time import sleep
 
+import pytest
+
+from operatorinstructions.soffice_handler import SofficeHandler
 from com.sun.star.connection import NoConnectException
+
+
+
 
 soffice = SofficeHandler()
 soffice.files.append("")

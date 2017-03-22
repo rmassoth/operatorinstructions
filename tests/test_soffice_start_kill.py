@@ -1,5 +1,6 @@
 import pytest
-from soffice_handler import SofficeHandler
+
+from operatorinstructions.soffice_handler import SofficeHandler
 
 soffice = SofficeHandler()
 def test_start_soffice():

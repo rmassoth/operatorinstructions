@@ -1,5 +1,6 @@
 import pytest
-from database_handler import DatabaseHandler
+
+from operatorinstructions.database_handler import DatabaseHandler
 
 
 db_handler = DatabaseHandler(database='plantfloor')

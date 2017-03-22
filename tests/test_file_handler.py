@@ -1,7 +1,9 @@
-import pytest
 import os
-from file_handler import FileHandler
 from urllib.error import HTTPError, URLError
+
+import pytest
+
+from operatorinstructions.file_handler import FileHandler
 
 file_handler = FileHandler()
 filename = "temp_file"

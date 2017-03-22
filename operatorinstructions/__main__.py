@@ -1,16 +1,17 @@
+#!/usr/bin/python
 """
 
 This is the main program to run the operator instructions program from.
-It handles creating objects and swtiching between different presentations.
+It handles creating objects and swiching between different presentations.
 """
 import socket
 from time import sleep
 import logging
 import logging.handlers
 from urllib.request import Request
-from soffice_handler import SofficeHandler
-from file_handler import FileHandler
-from database_handler import DatabaseHandler
+from operatorinstructions.soffice_handler import SofficeHandler
+from operatorinstructions.file_handler import FileHandler
+from operatorinstructions.database_handler import DatabaseHandler
 
 soffice = SofficeHandler()
 file_handler = FileHandler()
@@ -84,6 +85,7 @@ def main():
                 if soffice.load_main_file_from_network():
                     soffice.show_main_slideshow()
             logger.debug("Setup complete, entering main loop...")
+
         while(True):
             # Main loop
             recipe = database_handler.get_current_running_recipe(
