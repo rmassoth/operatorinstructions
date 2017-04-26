@@ -28,7 +28,9 @@ class SofficeHandler():
     desktop = None
     files = []
     main_frame = None
+    frames = []
     presentation = None
+    presentations = []
     local_context = None
     resolver = None
 
@@ -144,7 +146,7 @@ class SofficeHandler():
         if self.desktop:
             self.desktop.terminate()
 
-    def load_file(index):
+    def load_file(self, index):
         """Load the file from the index position in the files list."""
         # get file in current directory
         url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()
@@ -152,10 +154,27 @@ class SofficeHandler():
             url, "_default", 0, ())
         self.presentation = self.main_frame.getPresentation()
 
-    def load_network_file(index):
-        """Load the file from the index position in the files list."""
-        # get file in current directory
-        url = pathlib.Path(os.getcwd(), self.files[0]).as_uri()
-        self.main_frame = self.desktop.loadComponentFromURL(
-            url, "_default", 0, ())
-        self.presentation = self.main_frame.getPresentation()
+    def load_files_from_network(self):
+        """Load files from the files list and create presentations."""
+        try:
+            for i, file in enumerate(self.files):
+                self.frames.append(
+                    self.desktop.loadComponentFromURL(file,
+                                                      "_default",
+                                                      0,
+                                                      ()
+                    )
+                )
+                self.presentations.append(self.frames[i].getPresentation())
+            return True
+        except IllegalArgumentException:
+            return False
+
+    def show_slideshow(self, index):
+        """Start the slideshow in presentation index."""
+        self.presentation = self.presentations[index]
+        self.presentation.start()
+
+    def end_slideshow(self):
+        """End the current slideshow."""
+        self.presentation.end()

@@ -7,6 +7,11 @@ db_handler = DatabaseHandler(database='plantfloor')
 def test_get_current_recipe_filename():
     assert isinstance(db_handler.get_current_recipe_filename(1, 61), str)
 
+def test_get_all_filenames():
+    files = db_handler.get_all_files(1, 61)
+    assert type(files) == list
+    assert len(files) == 2
+
 def test_get_missing_current_recipe_filename():
     assert db_handler.get_current_recipe_filename(1, 1) == None
 

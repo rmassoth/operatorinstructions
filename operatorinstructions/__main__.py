@@ -3,6 +3,7 @@
 
 This is the main program to run the operator instructions program from.
 It handles creating objects and swiching between different presentations.
+Created by Ryan Massoth
 """
 import socket
 from time import sleep
@@ -16,14 +17,17 @@ from operatorinstructions.database_handler import DatabaseHandler
 soffice = SofficeHandler()
 file_handler = FileHandler()
 database_handler = DatabaseHandler(database="plantfloor")
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-log_handler = logging.handlers.RotatingFileHandler("operatorinstructions.log",
-                                                   maxBytes=500000,
-                                                   backupCount=2)
-log_format = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-log_handler.setFormatter(log_format)
-logger.addHandler(log_handler)
+UNCONFIGURED = ("http://ah-plantfloor.marisabae.com/media/operatorinstructions"
+               "/Unconfigured.pptx")
+# logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
+# log_handler = logging.handlers.RotatingFileHandler(
+#     "operatorinstructions.log",
+#     maxBytes=500000,
+#     backupCount=2)
+# log_format = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+# log_handler.setFormatter(log_format)
+# logger.addHandler(log_handler)
 
 class RPI():
     """
@@ -70,18 +74,15 @@ def main():
 
             recipe = database_handler.get_current_running_recipe(
                 rpi.linenumber_id)
-            file = database_handler.get_current_recipe_filename(rpi.unit_id,
-                                                                recipe)
-            if file:
-                soffice.files.append(file)
+            files = database_handler.get_all_files(rpi.unit_id, recipe)
+            if bool(files):
+                soffice.files = files
             else:
-                soffice.files.append("http://ah-plantfloor.marisabae.com/media"
-                    "/operatorinstructions/Unconfigured.pptx")
+                soffice.files.append(UNCONFIGURED)
             if soffice.load_main_file_from_network():
                 soffice.show_main_slideshow()
             else:
-                soffice.files[0] = ("http://ah-plantfloor.marisabae.com/media"
-                    "/operatorinstructions/Unconfigured.pptx")
+                soffice.files[0] = (UNCONFIGURED)
                 if soffice.load_main_file_from_network():
                     soffice.show_main_slideshow()
             logger.debug("Setup complete, entering main loop...")
@@ -90,17 +91,15 @@ def main():
             # Main loop
             recipe = database_handler.get_current_running_recipe(
                 rpi.linenumber_id)
-            file = database_handler.get_current_recipe_filename(rpi.unit_id,
-                                                                recipe)
+            files = database_handler.get_all_files(rpi.unit_id, recipe)
             # Change main slideshow if recipe changed
-            if file and file != soffice.files[0]:
-                soffice.files[0] = file
+            if bool(files) and files != soffice.files:
+                soffice.files = files
                 soffice.end_main_slideshow()
                 soffice.load_main_file_from_network()
                 soffice.show_main_slideshow()
             else:
-                soffice.files.append("http://ah-plantfloor.marisabae.com/media"
-                    "/operatorinstructions/Unconfigured.pptx")
+                soffice.files.append(UNCONFIGURED)
 
             # Restart soffice if it died for some reason
             if soffice.sub.poll() is not None:

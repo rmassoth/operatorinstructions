@@ -6,4 +6,10 @@ setup(name='operatorinstructions',
       author='Ryan Massoth',
       author_email='rmassoth@baeind.com',
       packages=['operatorinstructions'],
-      install_requires=['psycopg2>=2.7',])
+      install_requires=['psycopg2>=2.7'],
+      entry_points={
+        'console_scripts':[
+            'operatorinstructions = operatorinstructions.__main__:main'
+        ]
+      },
+      )

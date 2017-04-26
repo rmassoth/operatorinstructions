@@ -15,15 +15,25 @@ class DatabaseHandler():
     """
 
     def __init__(
-            self, host='localhost', database=None, user=None, password=None):
-        """Initialize the database connection parameters"""
+            self,
+            host='localhost',
+            database=None,
+            user=None,
+            password=None):
+        """
+
+        Initialize the database connection parameters
+        """
         self.user = user
         self.password = password
         self.host = host
         self.database = database
 
     def get_current_running_recipe(self, machine_id):
-        """Connect to the database and get the running partnumber."""
+        """
+
+        Connect to the database and get the running partnumber.
+        """
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
@@ -44,7 +54,10 @@ class DatabaseHandler():
             print(error)
 
     def get_current_recipe_filename(self, unit_id, recipe):
-        """Connect to the database and retreive the document number."""
+        """
+
+        Connect to the database and retrieve the document number.
+        """
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
@@ -65,7 +78,11 @@ class DatabaseHandler():
             print(error)
 
     def get_rpi_config(self, hostname):
-        """Connect to the database and get the raspberry pi config info."""
+        """
+
+        Connect to the database and get the raspberry pi config
+        info.
+        """
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
@@ -86,7 +103,11 @@ class DatabaseHandler():
             print(error)
 
     def get_rpi_version(self):
-        """Connect to the database and get the raspberry pi config info."""
+        """
+
+        Connect to the database and get the raspberry pi config
+        info.
+        """
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
@@ -99,6 +120,31 @@ class DatabaseHandler():
             db_connection.close()
             if bool(config):
                 return config[0]
+            else:
+                return None
+        except psycopg2.Error as error:
+            if db_connection:
+                db_connection.close()
+            print(error)
+
+    def get_all_files(self, unit_id, recipe):
+        """
+
+        Connect to the database and get all the files configured for
+        this recipe.
+        """
+        try:
+            db_connection = psycopg2.connect(
+                host=self.host,
+                database=self.database)
+            cursor = db_connection.cursor()
+            cursor.execute(
+                "select doc_url from rpimanager_rpiconfig where rpi_id=%s "
+                "and partnumber_id=%s;", (unit_id, recipe,))
+            filenames_list = cursor.fetchall()
+            db_connection.close()
+            if bool(filenames_list):
+                return [[x][0] for x in filenames_list]
             else:
                 return None
         except psycopg2.Error as error:
