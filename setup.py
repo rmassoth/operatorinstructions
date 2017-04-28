@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='operatorinstructions',
-      version='0.8.0',
+      version='1.0.0',
       description='BAE Operator Instruction Management',
       author='Ryan Massoth',
       author_email='rmassoth@baeind.com',
