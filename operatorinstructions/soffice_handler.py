@@ -18,6 +18,7 @@ if getattr(os.environ, 'URE_BOOTSTRAP', None) is None:
 import uno
 from com.sun.star.connection import NoConnectException
 from com.sun.star.lang import IllegalArgumentException
+from com.sun.star.script import CannotConvertException
 
 class SofficeHandler():
     """Class to handle all libreoffice(soffice) related functions."""
@@ -156,8 +157,8 @@ class SofficeHandler():
 
     def load_files_from_network(self):
         """Load files from the files list and create presentations."""
-        try:
-            for i, file in enumerate(self.files):
+        for i, file in enumerate(self.files):
+            try:
                 self.frames.append(
                     self.desktop.loadComponentFromURL(file,
                                                       "_default",
@@ -166,9 +167,18 @@ class SofficeHandler():
                     )
                 )
                 self.presentations.append(self.frames[i].getPresentation())
-            return True
-        except IllegalArgumentException:
+            except IllegalArgumentException:
+                self.frames.append(None)
+                self.presentations.append(None)
+                pass
+            except CannotConvertException:
+                self.frames.append(None)
+                self.presentations.append(None)
+                pass
+        if not bool(self.presentations):
             return False
+        else:
+            return True
 
     def show_slideshow(self, index):
         """Start the slideshow in presentation index."""
@@ -177,4 +187,20 @@ class SofficeHandler():
 
     def end_slideshow(self):
         """End the current slideshow."""
-        self.presentation.end()
+        if self.presentation:
+            self.presentation.end()
+
+    def close_files(self):
+        """Close the all frames don't kill the process."""
+        # Close and delete presentations.
+        if bool(self.presentations):
+            for presentation in self.presentations:
+                if presentation is not None:
+                    presentation.end()
+            self.presentations = []
+        # Close and delete frames.
+        if bool(self.frames):
+            for frame in self.frames:
+                if frame is not None:
+                    frame.close(True)
+            self.frames = []

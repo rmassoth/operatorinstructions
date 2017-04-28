@@ -8,9 +8,24 @@ def test_get_current_recipe_filename():
     assert isinstance(db_handler.get_current_recipe_filename(1, 61), str)
 
 def test_get_all_filenames():
-    files = db_handler.get_all_files(1, 61)
+    files = db_handler.get_all_files(4, 42)
+    print(files)
     assert type(files) == list
-    assert len(files) == 2
+    assert len(files) == 3
+    assert files == [
+        ("http://ah-plantfloor.marisabae.com/ahdocs/AUBURN%20HILLS%20PRODUCTIO"
+            "N%20DOCUMENTS/440%20A%20-%20LINE/2553526%20P552%201703389XXX%20P5"
+            "58%20-%20ALT/01%20Operator%20Instructions/%28I-11450%29%20P552%20"
+            "2553526%20P558%201703389XXX%20High%20Lock%20Sta%2001.ppt"),
+        ("http://ah-plantfloor.marisabae.com/ahdocs/AUBURN%20HILLS%20PRODUCTIO"
+            "N%20DOCUMENTS/440%20A%20-%20LINE/2553526%20P552%201703389XXX%20P5"
+            "58%20-%20ALT/01%20Operator%20Instructions/%28I-11451%29%20P552%20"
+            "2553526%20P558%201703389XXX%20High%20Lock%20Sta%2005.ppt"),
+        ("http://ah-plantfloor.marisabae.com/ahdocs/AUBURN%20HILLS%20PRODUCTIO"
+            "N%20DOCUMENTS/440%20A%20-%20LINE/2553526%20P552%201703389XXX%20P5"
+            "58%20-%20ALT/01%20Operator%20Instructions/%28I-11452%29%20P552%20"
+            "2553526%20P558%201703389XXX%20High%20Lock%20Sta%2015.ppt")
+    ]
 
 def test_get_missing_current_recipe_filename():
     assert db_handler.get_current_recipe_filename(1, 1) == None

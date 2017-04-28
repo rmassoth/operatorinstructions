@@ -72,48 +72,50 @@ def main():
                       active=rpi_config[4],
                       linenumber_id=rpi_config[5])
 
-            recipe = database_handler.get_current_running_recipe(
-                rpi.linenumber_id)
-            files = database_handler.get_all_files(rpi.unit_id, recipe)
-            if bool(files):
-                soffice.files = files
-            else:
-                soffice.files.append(UNCONFIGURED)
-            if soffice.load_main_file_from_network():
-                soffice.show_main_slideshow()
-            else:
-                soffice.files[0] = (UNCONFIGURED)
-                if soffice.load_main_file_from_network():
-                    soffice.show_main_slideshow()
-            logger.debug("Setup complete, entering main loop...")
-
         while(True):
             # Main loop
             recipe = database_handler.get_current_running_recipe(
                 rpi.linenumber_id)
+            # Get urls from the database
             files = database_handler.get_all_files(rpi.unit_id, recipe)
+
             # Change main slideshow if recipe changed
             if bool(files) and files != soffice.files:
+                # Set the new files
                 soffice.files = files
-                soffice.end_main_slideshow()
-                soffice.load_main_file_from_network()
-                soffice.show_main_slideshow()
-            else:
-                soffice.files.append(UNCONFIGURED)
+                current_presentation = 0
+                if bool(soffice.presentations):
+                    soffice.end_slideshow()
+                # Load the new files from the network
+                soffice.load_files_from_network()
+                sleep(5)
+            # else:
+            #     soffice.files = [ UNCONFIGURED ]
 
             # Restart soffice if it died for some reason
             if soffice.sub.poll() is not None:
-                logger.debug("Soffice died. Poll: {}".format(
-                    soffice.sub.poll()))
+                # logger.debug("Soffice died. Poll: {}".format(
+                    # soffice.sub.poll()))
                 #soffice.kill_soffice() # gets stuck for some reason
                 soffice.start_soffice()
                 soffice.connect()
-                soffice.load_main_file_from_network()
-                soffice.show_main_slideshow()
-            sleep(30)
+            else:
+                num_presentations = len(soffice.presentations)
+
+                # Reset presentation count if greater than or equal
+                # to the number of presentations
+                if current_presentation >= num_presentations:
+                    current_presentation = 0
+
+                # Show current presentation if it isn't None
+                if soffice.presentations[current_presentation]:
+                    soffice.end_slideshow()
+                    soffice.show_slideshow(current_presentation)
+                current_presentation += 1
+            sleep(10)
         soffice.kill_soffice()
     except Exception as error:
-        logger.error(error)
+        # logger.error(error)
         raise
 
 if __name__ == "__main__":

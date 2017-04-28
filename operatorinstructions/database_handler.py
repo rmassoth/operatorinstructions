@@ -144,7 +144,7 @@ class DatabaseHandler():
             filenames_list = cursor.fetchall()
             db_connection.close()
             if bool(filenames_list):
-                return [[x][0] for x in filenames_list]
+                return [x[0] for x in filenames_list]
             else:
                 return None
         except psycopg2.Error as error:
