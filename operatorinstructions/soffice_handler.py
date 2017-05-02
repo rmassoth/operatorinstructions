@@ -9,6 +9,7 @@ import os
 import sys
 import pathlib
 from time import sleep
+import logging
 
 # add necessary environment variable for pyuno if it doesn't already exist
 sys.path.append('/usr/lib/libreoffice/program')
@@ -170,12 +171,13 @@ class SofficeHandler():
             except IllegalArgumentException:
                 self.frames.append(None)
                 self.presentations.append(None)
-                pass
+                logging.error("Illegal argument exception.  Perhaps not url.")
             except CannotConvertException:
                 self.frames.append(None)
                 self.presentations.append(None)
-                pass
+                logging.error("Could not convert file.")
         if not bool(self.presentations):
+            logging.warning("No presentations setup")
             return False
         else:
             return True

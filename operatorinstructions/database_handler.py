@@ -5,6 +5,7 @@ instructions module.
 """
 
 import psycopg2
+import logging
 
 class DatabaseHandler():
     """
@@ -16,7 +17,7 @@ class DatabaseHandler():
 
     def __init__(
             self,
-            host='localhost',
+            host='10.51.50.21',
             database=None,
             user=None,
             password=None):
@@ -51,7 +52,7 @@ class DatabaseHandler():
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
-            print(error)
+            logging.error(error)
 
     def get_current_recipe_filename(self, unit_id, recipe):
         """
@@ -75,7 +76,7 @@ class DatabaseHandler():
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
-            print(error)
+            logging.error(error)
 
     def get_rpi_config(self, hostname):
         """
@@ -100,7 +101,7 @@ class DatabaseHandler():
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
-            print(error)
+            logging.error(error)
 
     def get_rpi_version(self):
         """
@@ -125,7 +126,7 @@ class DatabaseHandler():
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
-            print(error)
+            logging.error(error)
 
     def get_all_files(self, unit_id, recipe):
         """
@@ -150,4 +151,4 @@ class DatabaseHandler():
         except psycopg2.Error as error:
             if db_connection:
                 db_connection.close()
-            print(error)
+            logging.error(error)

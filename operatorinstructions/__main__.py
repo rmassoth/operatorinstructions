@@ -19,8 +19,8 @@ file_handler = FileHandler()
 database_handler = DatabaseHandler(database="plantfloor")
 UNCONFIGURED = ("http://ah-plantfloor.marisabae.com/media/operatorinstructions"
                "/Unconfigured.pptx")
-# logger = logging.getLogger()
-# logger.setLevel(logging.DEBUG)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 # log_handler = logging.handlers.RotatingFileHandler(
 #     "operatorinstructions.log",
 #     maxBytes=500000,
@@ -62,15 +62,23 @@ def main():
     try:
         soffice.start_soffice()
         soffice.connect()
-        rpi_config = database_handler.get_rpi_config(
-            hostname=socket.gethostname())
-        if rpi_config:
-            rpi = RPI(unit_id=rpi_config[0],
-                      hostname=rpi_config[1],
-                      ipaddress=rpi_config[2],
-                      description=rpi_config[3],
-                      active=rpi_config[4],
-                      linenumber_id=rpi_config[5])
+        rpi_configured = False
+        while not rpi_configured:
+            rpi_config = database_handler.get_rpi_config(
+                hostname=socket.gethostname())
+            if rpi_config:
+                rpi = RPI(unit_id=rpi_config[0],
+                          hostname=rpi_config[1],
+                          ipaddress=rpi_config[2],
+                          description=rpi_config[3],
+                          active=rpi_config[4],
+                          linenumber_id=rpi_config[5])
+                rpi_configured = True
+            else:
+                logger.warning("No config found for this unit ({}) in the "
+                            "database. Pausing for 30 seconds..."
+                            .format(socket.gethostname()))
+                sleep(30)
 
         while(True):
             # Main loop
@@ -84,13 +92,23 @@ def main():
                 # Set the new files
                 soffice.files = files
                 current_presentation = 0
+                last_presentation = None
                 if bool(soffice.presentations):
                     soffice.end_slideshow()
+                    soffice.close_files()
                 # Load the new files from the network
                 soffice.load_files_from_network()
                 sleep(5)
-            # else:
-            #     soffice.files = [ UNCONFIGURED ]
+            # Set the unconfigured path if no files are configured
+            # in the database
+            if not bool(files) and soffice.files != [ UNCONFIGURED ]:
+                logger.warning("No files setup in database, setting "
+                               "unconfigured.")
+                soffice.files = [ UNCONFIGURED ]
+                soffice.load_files_from_network()
+                current_presentation = 0
+                last_presentation = None
+                sleep(5)
 
             # Restart soffice if it died for some reason
             if soffice.sub.poll() is not None:
@@ -109,13 +127,15 @@ def main():
 
                 # Show current presentation if it isn't None
                 if soffice.presentations[current_presentation]:
-                    soffice.end_slideshow()
-                    soffice.show_slideshow(current_presentation)
+                    if current_presentation != last_presentation:
+                        soffice.end_slideshow()
+                        soffice.show_slideshow(current_presentation)
+                last_presentation = current_presentation
                 current_presentation += 1
             sleep(10)
         soffice.kill_soffice()
     except Exception as error:
-        # logger.error(error)
+        logger.error(error)
         raise
 
 if __name__ == "__main__":
