@@ -9,7 +9,9 @@ import socket
 from time import sleep
 import logging
 import logging.handlers
+import os
 from urllib.request import Request
+
 from operatorinstructions.soffice_handler import SofficeHandler
 from operatorinstructions.file_handler import FileHandler
 from operatorinstructions.database_handler import DatabaseHandler
@@ -19,15 +21,16 @@ file_handler = FileHandler()
 database_handler = DatabaseHandler(database="plantfloor")
 UNCONFIGURED = ("http://ah-plantfloor.marisabae.com/media/operatorinstructions"
                "/Unconfigured.pptx")
+HOME_FOLDER = os.path.expanduser('~')
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-# log_handler = logging.handlers.RotatingFileHandler(
-#     "operatorinstructions.log",
-#     maxBytes=500000,
-#     backupCount=2)
-# log_format = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-# log_handler.setFormatter(log_format)
-# logger.addHandler(log_handler)
+log_handler = logging.handlers.RotatingFileHandler(
+    os.path.join(HOME_FOLDER, "operatorinstructions.log"),
+    maxBytes=500000,
+    backupCount=2)
+log_format = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+log_handler.setFormatter(log_format)
+logger.addHandler(log_handler)
 
 class RPI():
     """
@@ -74,6 +77,7 @@ def main():
                           active=rpi_config[4],
                           linenumber_id=rpi_config[5])
                 rpi_configured = True
+                logger.info("Retrieved rpi config.")
             else:
                 logger.warning("No config found for this unit ({}) in the "
                             "database. Pausing for 30 seconds..."

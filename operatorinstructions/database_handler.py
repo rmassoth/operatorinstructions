@@ -18,7 +18,7 @@ class DatabaseHandler():
     def __init__(
             self,
             host='10.51.50.21',
-            database=None,
+            database='plantfloor',
             user=None,
             password=None):
         """
@@ -50,8 +50,6 @@ class DatabaseHandler():
             else:
                 return None
         except psycopg2.Error as error:
-            if db_connection:
-                db_connection.close()
             logging.error(error)
 
     def get_current_recipe_filename(self, unit_id, recipe):
@@ -74,8 +72,6 @@ class DatabaseHandler():
             else:
                 return None
         except psycopg2.Error as error:
-            if db_connection:
-                db_connection.close()
             logging.error(error)
 
     def get_rpi_config(self, hostname):
@@ -99,8 +95,6 @@ class DatabaseHandler():
             else:
                 return None
         except psycopg2.Error as error:
-            if db_connection:
-                db_connection.close()
             logging.error(error)
 
     def get_rpi_version(self):
@@ -124,8 +118,6 @@ class DatabaseHandler():
             else:
                 return None
         except psycopg2.Error as error:
-            if db_connection:
-                db_connection.close()
             logging.error(error)
 
     def get_all_files(self, unit_id, recipe):
@@ -149,6 +141,4 @@ class DatabaseHandler():
             else:
                 return None
         except psycopg2.Error as error:
-            if db_connection:
-                db_connection.close()
             logging.error(error)
