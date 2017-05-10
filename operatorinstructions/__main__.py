@@ -2,7 +2,7 @@
 """
 
 This is the main program to run the operator instructions program from.
-It handles creating objects and swiching between different presentations.
+It handles creating objects and switching between different presentations.
 Created by Ryan Massoth
 """
 import socket
@@ -136,7 +136,7 @@ def main():
                         soffice.show_slideshow(current_presentation)
                 last_presentation = current_presentation
                 current_presentation += 1
-            sleep(10)
+            sleep(30)
         soffice.kill_soffice()
     except Exception as error:
         logger.error(error)
