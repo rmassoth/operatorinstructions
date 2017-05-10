@@ -61,7 +61,8 @@ class DatabaseHandler():
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
-                database=self.database)
+                database=self.database,
+                user=self.user)
             cursor = db_connection.cursor()
             cursor.execute(
                 "select doc_url from rpimanager_rpiconfig where rpi_id=%s "
@@ -84,7 +85,8 @@ class DatabaseHandler():
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
-                database=self.database)
+                database=self.database,
+                user=self.user)
             cursor = db_connection.cursor()
             cursor.execute(
                 "select * from rpimanager_rpiunit where hostname=%s;",
@@ -107,7 +109,8 @@ class DatabaseHandler():
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
-                database=self.database)
+                database=self.database,
+                user=self.user)
             cursor = db_connection.cursor()
             cursor.execute(
                 "select * from rpimanager_rpiversion order by id desc "
@@ -130,7 +133,8 @@ class DatabaseHandler():
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
-                database=self.database)
+                database=self.database,
+                user=self.user)
             cursor = db_connection.cursor()
             cursor.execute(
                 "select doc_url from rpimanager_rpiconfig where rpi_id=%s "
