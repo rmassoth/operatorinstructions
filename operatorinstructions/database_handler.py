@@ -19,7 +19,7 @@ class DatabaseHandler():
             self,
             host='10.51.50.21',
             database='plantfloor',
-            user=None,
+            user='ryan',
             password=None):
         """
 
@@ -38,7 +38,8 @@ class DatabaseHandler():
         try:
             db_connection = psycopg2.connect(
                 host=self.host,
-                database=self.database)
+                database=self.database,
+                user=self.user)
             cursor = db_connection.cursor()
             query = ("select running_recipe_id from "
                      "productiondata_livedata where machine_id=%s;")
